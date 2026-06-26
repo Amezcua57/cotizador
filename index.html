@@ -14,6 +14,8 @@
     const _up = new URLSearchParams(window.location.search);
     const CORREO_AUTORIZADO = _up.get('e') ? atob(_up.get('e')) : "cliente@correo.com";
     const FECHA_EXPIRACION  = _up.get('x') || "2026-12-31";
+    // Datos del cotizador codificados en URL para modo cliente
+    const _DATOS_CLIENTE = _up.get('d') ? (function(){ try { return JSON.parse(atob(_up.get('d'))); } catch(e){ return null; } })() : null;
     // ══════════════════════════════════════════════
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -718,7 +720,7 @@
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
     <!-- ======== LEFT COLUMN ======== -->
-    <div class="lg:col-span-1 space-y-5">
+    <div id="paramsColumn" class="lg:col-span-1 space-y-5">
 
       <!-- Card 1: La Propiedad -->
       <div class="card">
@@ -3203,6 +3205,7 @@ function saveState() {
 // ── RESTAURAR parámetros de propiedad guardados ──────────────
 function loadState() {
   if (window.__CLIENTE_STATIC) return false; // modo cliente — no restaurar
+  if (_DATOS_CLIENTE) return false;           // datos en URL — no sobreescribir
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return false;
@@ -3222,6 +3225,7 @@ function loadState() {
 // ── SIEMPRE aplicar promedios históricos a las tasas ─────────
 function aplicarTasasHistoricas() {
   if (window.__CLIENTE_STATIC) return; // modo cliente — no resetear tasas
+  if (_DATOS_CLIENTE) return;          // datos en URL — no sobreescribir tasas
   Object.entries(TASAS_HISTORICAS).forEach(([id, val]) => {
     const el = document.getElementById(id);
     if (el) el.value = val;
@@ -3231,6 +3235,15 @@ function aplicarTasasHistoricas() {
 // ── ARRANCAR ─────────────────────────────────────────────────
 aplicarTasasHistoricas(); // tasas: siempre el promedio histórico
 loadState();              // propiedad: restaurar lo último guardado
+
+// ── Si vienen datos del cliente en URL, aplicarlos y calcular ──
+if (_DATOS_CLIENTE) {
+  Object.entries(_DATOS_CLIENTE).forEach(function(entry) {
+    var el = document.getElementById(entry[0]);
+    if (el) el.value = entry[1];
+  });
+}
+
 calculate();
 // Siempre iniciar en ¿Quién Gana? independientemente de sesión anterior
 (function() {
@@ -3386,6 +3399,11 @@ function detectarClave(val) {
       window.open(gmailUrl, '_blank');
       document.getElementById('lockScreen').style.display = 'none';
       document.getElementById('appContent').style.display = 'block';
+      // Si hay datos en URL, ocultar panel de parámetros — solo presentación
+      if (_DATOS_CLIENTE) {
+        var pc = document.getElementById('paramsColumn');
+        if (pc) pc.style.display = 'none';
+      }
     } else {
       mostrarError('❌ Correo no autorizado. Este archivo es de uso exclusivo de ' + CORREO_AUTORIZADO + '.');
       emailInput.style.borderColor = '#ef4444';
@@ -3450,6 +3468,16 @@ function agregarCliente() {
     return;
   }
 
+  // Capturar el estado actual del cotizador para este cliente
+  const _todosIDs = ['propertyPrice','dailyRate','downPct','mortgageRate','mortgageTerm',
+                     'projectionYears','plusvaliaRate','grossRentYield','opExpenses',
+                     'cetesRate','udiRate','sp500Rate','dollarRate','devalRate'];
+  const estadoCotizador = {};
+  _todosIDs.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) estadoCotizador[id] = el.value;
+  });
+
   const clientes = adminGetClientes();
   const nuevo = {
     id: Date.now(),
@@ -3458,7 +3486,8 @@ function agregarCliente() {
     correo,
     enviado:  enviado || new Date().toISOString().split('T')[0],
     expira,
-    creado:   new Date().toISOString().split('T')[0]
+    creado:   new Date().toISOString().split('T')[0],
+    estado:   estadoCotizador
   };
   clientes.unshift(nuevo);
   adminSaveClientes(clientes);
@@ -3519,7 +3548,27 @@ function adminGenerarLink(cliente) {
   const base = 'https://amezcua57.github.io/cotizador/';
   const e = btoa(cliente.correo);
   const x = cliente.expira;
-  return base + '?e=' + encodeURIComponent(e) + '&x=' + encodeURIComponent(x);
+  let url = base + '?e=' + encodeURIComponent(e) + '&x=' + encodeURIComponent(x);
+  if (cliente.estado && Object.keys(cliente.estado).length > 0) {
+    url += '&d=' + encodeURIComponent(btoa(JSON.stringify(cliente.estado)));
+  }
+  return url;
+}
+
+function adminCopiarLink(id) {
+  const clientes = adminGetClientes();
+  const c = clientes.find(function(x){ return x.id === id; });
+  if (!c) return;
+  const link = adminGenerarLink(c);
+  navigator.clipboard.writeText(link).then(function() {
+    // Mostrar feedback visual al botón que se clickeó
+    const btns = document.querySelectorAll('[data-copiar-id="' + id + '"]');
+    btns.forEach(function(btn) {
+      const orig = btn.textContent;
+      btn.textContent = '✅ Copiado!';
+      setTimeout(function(){ btn.textContent = orig; }, 2000);
+    });
+  });
 }
 
 function adminAbrirGmail(c) {
@@ -3734,7 +3783,7 @@ function adminRenderLista() {
         <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0;">
           <span style="${badge} padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">${badgeTxt}</span>
           <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
-            <button onclick="navigator.clipboard.writeText(adminGenerarLink({correo:'${c.correo}',expira:'${c.expira}'})).then(()=>{this.textContent='✅ Copiado!';setTimeout(()=>{this.textContent='🔗 Copiar Link'},2000)})"
+            <button onclick="adminCopiarLink(${c.id})" data-copiar-id="${c.id}"
               style="background:#f0fdf4; color:#166534; border:none; border-radius:8px; padding:6px 11px; font-size:12px; font-weight:700; cursor:pointer;">
               🔗 Copiar Link
             </button>
