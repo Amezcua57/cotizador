@@ -11,7 +11,7 @@
     //  Lee desde URL params si viene de GitHub Pages,
     //  si no usa los valores hardcoded del archivo.
     // ══════════════════════════════════════════════
-    const _up = new URLSearchParams(window.location.search);
+    const _up = new URLSearchParams(window.location.search);h
     const CORREO_AUTORIZADO = _up.get('e') ? atob(_up.get('e')) : "cliente@correo.com";
     const FECHA_EXPIRACION  = _up.get('x') || "2026-12-31";
     // Datos del cotizador codificados en URL para modo cliente
@@ -912,6 +912,8 @@
           </div>
           <!-- Reinversión rentas OCULTA – ya no se usa -->
           <input type="hidden" id="rentaRate" value="0">
+          <!-- Escenario de renta seleccionado — se guarda en localStorage -->
+          <input type="hidden" id="selectedRentPctInput" value="35">
         </div>
       </div>
 
@@ -1841,6 +1843,8 @@ function renderRentScenarios() {
 function applyRentScenario(occPct, grossPct) {
   selectedRentPct = occPct;
   document.getElementById('grossRentYield').value = grossPct;
+  var _spi = document.getElementById('selectedRentPctInput');
+  if (_spi) _spi.value = occPct;
   document.getElementById('rentFromScenario').classList.remove('hidden');
   var rd = document.getElementById('rentMetaDefault');
   if (rd) rd.classList.add('hidden');
@@ -3016,7 +3020,7 @@ function guardarMiCopia() {
   const campos = [
     'propertyPrice','dailyRate','downPct','mortgageRate',
     'mortgageTerm','projectionYears','plusvaliaRate',
-    'grossRentYield','opExpenses',
+    'grossRentYield','opExpenses','selectedRentPctInput',
   ];
   let html = document.documentElement.outerHTML;
 
@@ -3218,7 +3222,7 @@ const SAVE_KEY = 'caracol_propiedad_v2';
 const IDS_GUARDAR = [
   'propertyPrice', 'dailyRate', 'downPct', 'mortgageRate',
   'mortgageTerm',  'projectionYears', 'plusvaliaRate',
-  'grossRentYield','opExpenses',
+  'grossRentYield','opExpenses','selectedRentPctInput',
 ];
 
 // ── GUARDAR solo los parámetros de la propiedad ──────────────
@@ -3264,6 +3268,33 @@ function aplicarTasasHistoricas() {
 // ── ARRANCAR ─────────────────────────────────────────────────
 aplicarTasasHistoricas(); // tasas: siempre el promedio histórico
 loadState();              // propiedad: restaurar lo último guardado
+
+// ── Restaurar escenario de renta seleccionado ──────────────────
+// Lee selectedRentPctInput (guardado en localStorage) y recalcula
+// grossRentYield para que sea siempre consistente con la tarifa diaria actual.
+(function() {
+  if (window.__CLIENTE_STATIC) return;
+  var spi  = document.getElementById('selectedRentPctInput');
+  var pct  = spi ? parseInt(spi.value) : 35;
+  if (isNaN(pct)) pct = 35;
+  selectedRentPct = pct;
+  if (pct > 0) {
+    var dr = parseNum(document.getElementById('dailyRate').value);
+    var pr = parseNum(document.getElementById('propertyPrice').value);
+    if (dr > 0 && pr > 0) {
+      var dias = Math.round(365 * pct / 100);
+      var gp   = parseFloat((dr * dias / pr * 100).toFixed(1));
+      if (gp > 0) document.getElementById('grossRentYield').value = gp;
+    }
+    // Mostrar indicadores de "escenario seleccionado"
+    var rfs = document.getElementById('rentFromScenario');
+    var rmd = document.getElementById('rentMetaDefault');
+    var rsi = document.getElementById('rentScenarioSelected');
+    if (rfs) rfs.classList.remove('hidden');
+    if (rmd) rmd.classList.add('hidden');
+    if (rsi) rsi.classList.remove('hidden');
+  }
+})();
 
 // ── Si vienen datos del cliente en URL, aplicarlos y calcular ──
 if (_DATOS_CLIENTE) {
