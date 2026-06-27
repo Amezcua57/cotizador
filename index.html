@@ -3438,25 +3438,6 @@ function detectarClave(val) {
 
     // ── Verificar correo ──
     if (ingresado === autorizado) {
-      // ── Abrir Gmail con correo listo para enviar ────────────────────
-      const fecha  = new Date().toLocaleString('es-MX', { dateStyle:'full', timeStyle:'short' });
-      const gmailTo   = 'amezcuaizquierdo@gmail.com';
-      const gmailAsunto = encodeURIComponent('Nuevo acceso al proyector: ' + nombre + ' — Caracol Diamante');
-      const gmailCuerpo = encodeURIComponent(
-        'Hola Francisco,' +
-        '\n\nUn cliente acaba de abrir su proyector personalizado:' +
-        '\n\nNombre:    ' + nombre +
-        '\nTeléfono:  ' + telefono +
-        '\nCorreo:    ' + emailInput.value.trim() +
-        '\nFecha:     ' + fecha +
-        '\n\nEste cliente ya puede ver su proyector de Caracol Diamante.' +
-        '\n\n— Sistema automático Caracol Diamante'
-      );
-      const gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1' +
-        '&to='   + encodeURIComponent(gmailTo) +
-        '&su='   + gmailAsunto +
-        '&body=' + gmailCuerpo;
-      window.open(gmailUrl, '_blank');
       document.getElementById('lockScreen').style.display = 'none';
       document.getElementById('appContent').style.display = 'block';
       // Si hay datos en URL, ocultar panel de parámetros — solo presentación
