@@ -1562,7 +1562,7 @@ function calculate() {
   // Total cash deployed (same for all scenarios)
   const totalInvested = enganche + annualContrib * projYears;
 
-  const sello = { enganche, monthly, totalInvested, projYears };
+  const sello = { enganche, monthly, totalInvested, projYears, downPct };
 
   renderRentScenarios();
   renderWinner(hist, finals(hist), totalInvested, enganche, monthly, projYears);
@@ -2318,8 +2318,8 @@ function renderTable(hist, projYears, sello, enganche) {
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
       <div style="background:white;border-radius:14px;border-left:4px solid #C8922A;padding:16px;box-shadow:0 2px 8px rgba(11,29,58,0.07);">
         <p style="font-size:22px;margin:0 0 6px;">🔑</p>
-        <p style="font-size:12px;font-weight:900;color:#0B1D3A;margin:0 0 5px;">Apalancamiento ${Math.round(100/rates.downPct)}:1</p>
-        <p style="font-size:11px;color:#475569;line-height:1.5;margin:0;">Con el enganche (${rates.downPct}% del precio) controlas el 100% del inmueble. Cada peso de plusvalía es tuyo, no del banco. El S&P 500 no te presta dinero para invertir.</p>
+        <p style="font-size:12px;font-weight:900;color:#0B1D3A;margin:0 0 5px;">Apalancamiento ${Math.round(100/sello.downPct)}:1</p>
+        <p style="font-size:11px;color:#475569;line-height:1.5;margin:0;">Con el enganche (${sello.downPct}% del precio) controlas el 100% del inmueble. Cada peso de plusvalía es tuyo, no del banco. El S&P 500 no te presta dinero para invertir.</p>
       </div>
       <div style="background:white;border-radius:14px;border-left:4px solid #C8922A;padding:16px;box-shadow:0 2px 8px rgba(11,29,58,0.07);">
         <p style="font-size:22px;margin:0 0 6px;">💵</p>
