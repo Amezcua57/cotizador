@@ -1098,12 +1098,22 @@ function generarReporteCliente() {
 function _ejecutarReporteCliente(nombreCliente) {
   nombreCliente = nombreCliente || 'Cliente';
 
+  // Asegurar datos frescos antes de capturar
+  calculate();
+
   // Renderizar todos los tabs
   document.querySelectorAll('.tab-pane').forEach(function(p){ p.classList.remove('hidden'); });
   document.querySelectorAll('.faq-body').forEach(function(d){
     d.style.maxHeight='none'; d.style.padding='0 18px 14px';
   });
   document.querySelectorAll('canvas,#tab-chart').forEach(function(d){ d.style.display='none'; });
+
+  // Mover tabla comparativa al frente: justo después de tab-winner
+  var tabWinner = document.getElementById('tab-winner');
+  var tabTable  = document.getElementById('tab-table');
+  if (tabWinner && tabTable && tabWinner.nextElementSibling !== tabTable) {
+    tabWinner.parentNode.insertBefore(tabTable, tabWinner.nextSibling);
+  }
 
   var estilosInline = '';
   document.querySelectorAll('style').forEach(function(s) { estilosInline += s.textContent + '\n'; });
@@ -2289,8 +2299,8 @@ function renderTable(hist, projYears, sello, enganche) {
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
       <div style="background:white;border-radius:14px;border-left:4px solid #C8922A;padding:16px;box-shadow:0 2px 8px rgba(11,29,58,0.07);">
         <p style="font-size:22px;margin:0 0 6px;">🔑</p>
-        <p style="font-size:12px;font-weight:900;color:#0B1D3A;margin:0 0 5px;">Apalancamiento 10:1</p>
-        <p style="font-size:11px;color:#475569;line-height:1.5;margin:0;">Con el enganche (~10% del precio) controlas el 100% del inmueble. Cada peso de plusvalía es tuyo, no del banco. El S&P 500 no te presta dinero para invertir.</p>
+        <p style="font-size:12px;font-weight:900;color:#0B1D3A;margin:0 0 5px;">Apalancamiento ${Math.round(100/rates.downPct)}:1</p>
+        <p style="font-size:11px;color:#475569;line-height:1.5;margin:0;">Con el enganche (${rates.downPct}% del precio) controlas el 100% del inmueble. Cada peso de plusvalía es tuyo, no del banco. El S&P 500 no te presta dinero para invertir.</p>
       </div>
       <div style="background:white;border-radius:14px;border-left:4px solid #C8922A;padding:16px;box-shadow:0 2px 8px rgba(11,29,58,0.07);">
         <p style="font-size:22px;margin:0 0 6px;">💵</p>
@@ -3403,6 +3413,16 @@ function detectarClave(val) {
       if (_DATOS_CLIENTE) {
         var pc = document.getElementById('paramsColumn');
         if (pc) pc.style.display = 'none';
+        // Mostrar tabla comparativa año a año inmediatamente debajo del resumen
+        var tw = document.getElementById('tab-winner');
+        var tt = document.getElementById('tab-table');
+        if (tt) {
+          tt.classList.remove('hidden');
+          tt.style.display = 'block';
+          if (tw && tw.nextElementSibling !== tt) {
+            tw.parentNode.insertBefore(tt, tw.nextSibling);
+          }
+        }
       }
     } else {
       mostrarError('❌ Correo no autorizado. Este archivo es de uso exclusivo de ' + CORREO_AUTORIZADO + '.');
