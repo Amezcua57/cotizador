@@ -1109,11 +1109,23 @@ function _ejecutarReporteCliente(nombreCliente) {
   document.querySelectorAll('canvas,#tab-chart').forEach(function(d){ d.style.display='none'; });
 
   // Mover tabla comparativa al frente: justo después de tab-winner
+  // Y forzar display:block en TODOS los tab-pane con inline style
+  // (sin inline style, el HTML capturado puede quedar oculto al abrirlo el cliente)
+  document.querySelectorAll('.tab-pane').forEach(function(p) {
+    p.style.display = 'block';
+  });
+  document.querySelectorAll('canvas, #tab-chart').forEach(function(d) {
+    d.style.display = 'none';
+  });
+
   var tabWinner = document.getElementById('tab-winner');
   var tabTable  = document.getElementById('tab-table');
   if (tabWinner && tabTable && tabWinner.nextElementSibling !== tabTable) {
     tabWinner.parentNode.insertBefore(tabTable, tabWinner.nextSibling);
   }
+  // Asegurar que paramsColumn esté oculto en el reporte (solo se ve la proyección)
+  var pc = document.getElementById('paramsColumn');
+  if (pc) pc.style.display = 'none';
 
   var estilosInline = '';
   document.querySelectorAll('style').forEach(function(s) { estilosInline += s.textContent + '\n'; });
@@ -1203,6 +1215,13 @@ function _ejecutarReporteCliente(nombreCliente) {
   document.body.appendChild(a); a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+
+  // Restaurar estado del admin (revertir los cambios visuales que hicimos para capturar)
+  var pcRestore = document.getElementById('paramsColumn');
+  if (pcRestore) pcRestore.style.display = '';
+  document.querySelectorAll('.tab-pane').forEach(function(p) {
+    if (p.id !== 'tab-winner') p.style.display = '';
+  });
 
   // Confirmación en pantalla
   var msg = document.createElement('div');
