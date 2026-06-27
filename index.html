@@ -11,7 +11,7 @@
     //  Lee desde URL params si viene de GitHub Pages,
     //  si no usa los valores hardcoded del archivo.
     // ══════════════════════════════════════════════
-    const _up = new URLSearchParams(window.location.search);h
+    const _up = new URLSearchParams(window.location.search);
     const CORREO_AUTORIZADO = _up.get('e') ? atob(_up.get('e')) : "cliente@correo.com";
     const FECHA_EXPIRACION  = _up.get('x') || "2026-12-31";
     // Datos del cotizador codificados en URL para modo cliente
