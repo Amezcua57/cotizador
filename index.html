@@ -3602,7 +3602,7 @@ function adminGenerarArchivo(cliente) {
     zip.file(nombreHTML, personalizado);
     zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } })
       .then(function(blob) {
-       rconst a = document.createElement('a');
+        const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
         a.download = nombreZip;
         document.body.appendChild(a);
@@ -3613,7 +3613,7 @@ function adminGenerarArchivo(cliente) {
   } else {
     // Fallback: descargar HTML directo si JSZip no cargó
     const blob = new Blob([personalizado], { type: 'text/html' });
-   rconst a = document.createElement('a');
+    const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = nombreHTML;
     document.body.appendChild(a);
@@ -3655,7 +3655,7 @@ function adminAbrirGmail(c) {
     '&body=' + encodeURIComponent(cuerpo);
 
   // Usar <a> real para evitar bloqueo de popup
- rconst a = document.createElement('a');
+  const a = document.createElement('a');
   a.href = url;
   a.target = '_blank';
   a.rel = 'noopener';
@@ -3738,7 +3738,7 @@ function adminEnviarCorreo(id) {
     '<div style="font-size:24px;line-height:1;flex-shrink:0;">⬇️</div>' +
     '<div>' +
       '<p style="margin:0;font-weight:900;font-size:13px;color:#166534;">ZIP descargado a tu computadora</p>' +
-      '<p style="margin:4px 0 0;font-size:12px;color:#475569;">Nombrerdel archivo:<br>' +
+      '<p style="margin:4px 0 0;font-size:12px;color:#475569;">Nombre del archivo:<br>' +
         '<strong style="font-family:monospace;color:#0B1D3A;font-size:12px;background:#e2e8f0;padding:2px 6px;border-radius:5px;">' + nombreZip + '</strong>' +
       '</p>' +
       '<p style="margin:5px 0 0;font-size:11px;color:#94a3b8;">📂 Está en tu carpeta <strong>Descargas</strong></p>' +
@@ -3825,22 +3825,22 @@ function adminRenderLista() {
     const badgeTxt = activo ? '✅ Activo' : '⏰ Expirado';
     const tel      = c.telefono || '—';
     const enviado  = c.enviado  || c.creado || '—';
-    const safeNombrer= (c.nombre||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const safeNombre = (c.nombre||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     const safeTel    = (c.telefono||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     return `<div style="padding:14px 16px; border:1.5px solid #e2e8f0; border-radius:14px; margin-bottom:10px; background:#fafafa;">
-ormu  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
         <div style="flex:1; min-width:0;">
           <p style="font-weight:800; color:#1e293b; font-size:15px; margin:0 0 3px;">${c.nombre}</p>
           <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:4px;">
             <span style="font-size:12px; color:#475569;">📧 ${c.correo}</span>
             <span style="font-size:12px; color:#475569;">📱 ${tel}</span>
           </div>
-ormu      <div style="display:flex; gap:14px;">
+          <div style="display:flex; gap:14px;">
             <span style="font-size:11px; color:#94a3b8;">📤 Enviado: <strong>${enviado}</strong></span>
             <span style="font-size:11px; color:#94a3b8;">⏳ Vence: <strong>${c.expira}</strong></span>
           </div>
-ormu    </div>
-ormu    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0;">
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0;">
           <span style="${badge} padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">${badgeTxt}</span>
           <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
             <button onclick="navigator.clipboard.writeText(adminGenerarLink({correo:'${c.correo}',expira:'${c.expira}'})).then(()=>{this.textContent='✅ Copiado!';setTimeout(()=>{this.textContent='🔗 Copiar Link'},2000)})"
@@ -3860,9 +3860,9 @@ ormu    <div style="display:flex; flex-direction:column; align-items:flex-end; g
               🗑️
             </button>
           </div>
-ormu    </div>
-ormu  </div>
-ormu</div>`;
+        </div>
+      </div>
+    </div>`;
   }).join('');
 }
 
