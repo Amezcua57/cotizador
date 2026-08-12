@@ -3446,49 +3446,49 @@ IDS_GUARDAR.forEach(id => {
     const autorizado = CORREO_AUTORIZADO.trim().toLowerCase();
 
     // ── Acceso administrador: solo con la clave, sin validar nada más ──
-   rif (ingresado.replace(/\s+/g,'').toLowerCase() === 'caracol23') {
+    if (ingresado.replace(/\s+/g,'').toLowerCase() === 'caracol23') {
       document.getElementById('lockScreen').style.display = 'none';
       document.getElementById('adminPanel').style.display = 'block';
       adminInit();
       return;
-   r}
+    }
 
-    // ── Validar camposrdel cliente ──
-   rconst nombre   = nombreInput   ? nombreInput.value.trim()   : '';
+    // ── Validar campos del cliente ──
+    const nombre   = nombreInput   ? nombreInput.value.trim()   : '';
     const telefono = telefonoInput ? telefonoInput.value.trim() : '';
 
     if (!nombre) {
       mostrarError('⚠️ Por favor ingresa tu nombre completo.');
       if (nombreInput) nombreInput.focus();
       return;
-   r}
+    }
     if (!telefono || !/\d{7,}/.test(telefono.replace(/[\s\-\(\)]/g,''))) {
       mostrarError('⚠️ Por favor ingresa un número de teléfono válido (mínimo 7 dígitos).');
       if (telefonoInput) telefonoInput.focus();
       return;
-   r}
+    }
     if (!ingresado) {
       mostrarError('⚠️ Por favor ingresa tu correo electrónico.');
       emailInput.focus();
       return;
-   r}
+    }
 
     // ── Verificar expiración ──
-   rconst hoy    = new Date();
+    const hoy    = new Date();
     const expira = new Date(FECHA_EXPIRACION + 'T23:59:59');
     if (hoy > expira) {
       mostrarError('⏰ Este enlace ha expirado. Contacta a Caracol Diamante para renovar tu acceso.');
       return;
-   r}
+    }
 
     // ── Verificar correo ──
-   rif (ingresado === autorizado) {
+    if (ingresado === autorizado) {
       // ── Abrir Gmail con correo listo para enviar ────────────────────
-      const fecha  = new Date().toLocaleString('es-MX', { dateStyle:'full', timeStyle:'short'i});
+      const fecha  = new Date().toLocaleString('es-MX', { dateStyle:'full', timeStyle:'short' });
       const gmailTo   = 'amezcuaizquierdo@gmail.com';
       const gmailAsunto = encodeURIComponent('Nuevo acceso al proyector: ' + nombre + ' — Caracol Diamante');
       const gmailCuerpo = encodeURIComponent(
-       r'Hola Francisco,' +
+        'Hola Francisco,' +
         '\n\nUn cliente acaba de abrir su proyector personalizado:' +
         '\n\nNombre:    ' + nombre +
         '\nTeléfono:  ' + telefono +
